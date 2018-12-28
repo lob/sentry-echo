@@ -58,9 +58,14 @@ func NewWithOptions(options Options) (Sentry, error) {
 
 // Report sends information to Sentry.
 func (c *Sentry) Report(err error, req *http.Request) {
-	stacktrace := raven.NewException(err, raven.GetOrNewStacktrace(err, 0, 2, nil))
-	httpContext := raven.NewHttp(c.sanitizeRequest(req))
-	packet := raven.NewPacket(err.Error(), stacktrace, httpContext)
+	captured := []raven.Interface{
+		raven.NewException(err, raven.GetOrNewStacktrace(err, 0, 2, nil)),
+	}
+	if req != nil {
+		captured = append(captured, raven.NewHttp(c.sanitizeRequest(req)))
+	}
+
+	packet := raven.NewPacket(err.Error(), captured...)
 
 	c.client.Capture(packet, nil)
 }
