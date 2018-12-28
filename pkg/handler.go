@@ -3,7 +3,6 @@ package sentry
 import (
 	"net/http"
 
-	raven "github.com/getsentry/raven-go"
 	"github.com/labstack/echo"
 	logger "github.com/lob/logger-go"
 
@@ -11,13 +10,12 @@ import (
 )
 
 type handler struct {
-	reporter     client.ErrorReporter
-	filterFields []string
+	reporter client.Sentry
 }
 
 // RegisterErrorHandler takes in an Echo router and registers routes onto it.
-func RegisterErrorHandler(e *echo.Echo, reporter client.ErrorReporter, filterFields []string) {
-	h := handler{reporter, filterFields}
+func RegisterErrorHandler(e *echo.Echo, reporter client.Sentry) {
+	h := handler{reporter}
 
 	e.HTTPErrorHandler = h.handleError
 }
@@ -36,11 +34,7 @@ func (h *handler) handleError(err error, c echo.Context) {
 	}
 
 	if code == http.StatusInternalServerError {
-		stacktrace := raven.NewException(err, raven.GetOrNewStacktrace(err, 0, 2, nil))
-		httpContext := raven.NewHttp(h.sanitizeRequest(c.Request()))
-		packet := raven.NewPacket(msg, stacktrace, httpContext)
-
-		h.reporter.Capture(packet, map[string]string{})
+		h.reporter.Report(err, c.Request())
 	}
 
 	log.Root(logger.Data{"status_code": code}).Err(err).Error("request error")
@@ -49,21 +43,4 @@ func (h *handler) handleError(err error, c echo.Context) {
 	if err != nil {
 		log.Err(err).Error("error handler json error")
 	}
-}
-
-func (h *handler) sanitizeRequest(req *http.Request) *http.Request {
-	url := req.URL
-	query := url.Query()
-
-	for _, keyword := range h.filterFields {
-		for field := range url.Query() {
-			if keyword == field {
-				query[field] = []string{"[CENSORED]"}
-			}
-		}
-	}
-
-	req.URL.RawQuery = query.Encode()
-
-	return req
 }

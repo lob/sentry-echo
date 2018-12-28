@@ -3,10 +3,8 @@ package sentry
 import (
 	"errors"
 	"net/http"
-	"net/url"
 	"testing"
 
-	raven "github.com/getsentry/raven-go"
 	"github.com/labstack/echo"
 	"github.com/lob/sentry-echo/internal/test"
 	"github.com/stretchr/testify/assert"
@@ -14,8 +12,7 @@ import (
 
 type mockSentryClient struct{}
 
-func (m mockSentryClient) Capture(packet *raven.Packet, captureTags map[string]string) (string, chan error) {
-	return "", nil
+func (m mockSentryClient) Report(err error, req *http.Request) {
 }
 
 func TestHandler(t *testing.T) {
@@ -69,25 +66,5 @@ func TestHandler(t *testing.T) {
 
 		assert.Equal(tt, http.StatusNotFound, rr.Code, "expected HTTP errors to be correct")
 		assert.Contains(tt, rr.Body.String(), "Not Found", "expected HTTP errors to have the correct message")
-	})
-}
-
-func TestSantizeRequest(t *testing.T) {
-	h := handler{
-		reporter:     mockSentryClient{},
-		filterFields: []string{"signature"},
-	}
-
-	t.Run("censors secret query fields in request", func(tt *testing.T) {
-		req := &http.Request{
-			URL: &url.URL{
-				RawQuery: "test=foo&signature=12345",
-			},
-		}
-
-		sanitizedReq := h.sanitizeRequest(req)
-
-		assert.Contains(tt, sanitizedReq.URL.Query()["test"], "foo")
-		assert.Contains(tt, sanitizedReq.URL.Query()["signature"], "[CENSORED]")
 	})
 }
