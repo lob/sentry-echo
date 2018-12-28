@@ -1,0 +1,45 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10.7
+    working_directory: /go/src/github.com/lob/sentry-echo
+    steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /go/src/github.com/lob/sentry-echo/.git
+      - restore_cache:
+          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "Gopkg.lock" }}
+      - run:
+          name: Install workspace dependencies
+          command: |
+            make setup
+            make install
+      - save_cache:
+          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "Gopkg.lock" }}
+          paths:
+            - /go/src/github.com/lob/sentry-echo/vendor
+      - run:
+          name: Run linter
+          command: make lint
+      - run:
+          name: Run tests
+          command: make test
+      - run:
+          name: Enforce coverage
+          command: make enforce
+      - store_artifacts:
+          path: coverage.out
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
