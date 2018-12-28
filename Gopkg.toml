@@ -28,3 +28,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/getsentry/raven-go"
+  version = "0.2.0"
