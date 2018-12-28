@@ -1,4 +1,4 @@
-package client
+package sentry
 
 import (
 	"errors"
