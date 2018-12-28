@@ -2,54 +2,6 @@
 
 
 [[projects]]
-  digest = "1:bd285ec20a7450d2272631284de698f2d76e923a458fee90e99cc1db4b97708d"
-  name = "github.com/DataDog/datadog-go"
-  packages = ["statsd"]
-  pruneopts = "UT"
-  revision = "e67964b4021ad3a334e748e8811eb3cd6becbc6e"
-  version = "2.1.0"
-
-[[projects]]
-  digest = "1:ebcf7e453b1af64bf283d91211dc851fb3cce2a9aae9d6eafcf5bc9637f2db87"
-  name = "github.com/aws/aws-sdk-go"
-  packages = [
-    "aws",
-    "aws/awserr",
-    "aws/awsutil",
-    "aws/client",
-    "aws/client/metadata",
-    "aws/corehandlers",
-    "aws/credentials",
-    "aws/credentials/ec2rolecreds",
-    "aws/credentials/endpointcreds",
-    "aws/credentials/processcreds",
-    "aws/credentials/stscreds",
-    "aws/csm",
-    "aws/defaults",
-    "aws/ec2metadata",
-    "aws/endpoints",
-    "aws/request",
-    "aws/session",
-    "aws/signer/v4",
-    "internal/ini",
-    "internal/sdkio",
-    "internal/sdkrand",
-    "internal/sdkuri",
-    "internal/shareddefaults",
-    "private/protocol",
-    "private/protocol/query",
-    "private/protocol/query/queryutil",
-    "private/protocol/rest",
-    "private/protocol/xml/xmlutil",
-    "service/sqs",
-    "service/sqs/sqsiface",
-    "service/sts",
-  ]
-  pruneopts = "UT"
-  revision = "3991042237b45cf58c9d5f34295942d5533c28c6"
-  version = "v1.16.11"
-
-[[projects]]
   digest = "1:fed1f537c2f1269fe475a8556c393fe466641682d73ef8fd0491cd3aa1e47bad"
   name = "github.com/certifi/gocertifi"
   packages = ["."]
@@ -74,45 +26,12 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:7c77fa27e8a3697ef9669242ed54727563b538b1e9104ccde746ae2bdd9449d9"
-  name = "github.com/go-pg/pg"
-  packages = [
-    ".",
-    "internal",
-    "internal/iszero",
-    "internal/parser",
-    "internal/pool",
-    "internal/struct_filter",
-    "internal/tag",
-    "orm",
-    "types",
-  ]
-  pruneopts = "UT"
-  revision = "89035fa80013d44f2f5e6e7f2dc4778b10a36f83"
-  version = "v7.0.0"
-
-[[projects]]
   digest = "1:c594a691090b434d55c67f6cc8e326ef5ba49452abc059821bd5d4fd4cdef08c"
   name = "github.com/gofrs/uuid"
   packages = ["."]
   pruneopts = "UT"
   revision = "7077aa61129615a0d7f45c49101cd011ab221c27"
   version = "v3.1.2"
-
-[[projects]]
-  branch = "master"
-  digest = "1:fd97437fbb6b7dce04132cf06775bd258cce305c44add58eb55ca86c6c325160"
-  name = "github.com/jinzhu/inflection"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "04140366298a54a039076d798123ffa108fff46c"
-
-[[projects]]
-  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
-  name = "github.com/jmespath/go-jmespath"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c2b33e84"
 
 [[projects]]
   digest = "1:e55506f8670236cf09b6b65cda7d6afa403233a5b75397dfcba3555e484e4b18"
@@ -140,31 +59,6 @@
   pruneopts = "UT"
   revision = "dbc7781bd149e738d643d8667fb63d56ff71f5e9"
   version = "v1.0.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:f3e417a7c66fdb9b5ebf18ebb73ab58b0b5ae2518b2f82e2e2f05d51316ac09c"
-  name = "github.com/lob/metrics-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "db84c886d53a5261622afc9391921c8a40ec1598"
-
-[[projects]]
-  branch = "master"
-  digest = "1:c3cc44646d6116a60bbde296e329f2393b2c265ec9f7f1e02aa7afe5deafefde"
-  name = "github.com/lob/usage-api"
-  packages = [
-    "pkg/application",
-    "pkg/config",
-    "pkg/database",
-    "pkg/usage",
-    "pkg/usage/resource",
-    "pkg/usage/status",
-    "pkg/worker",
-    "pkg/zuora",
-  ]
-  pruneopts = "UT"
-  revision = "4511fc048fed3438602f3c1baedafae43d7b1879"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -236,23 +130,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5d0d5714f6082a5f7f12d313037390d06f557d71255fda0133855298c3b14b07"
+  digest = "1:e3d2db9bc633f4635e6418caf0b0734c43821ecd59105d1798458c6ae4d227fd"
   name = "golang.org/x/crypto"
   packages = [
     "acme",
     "acme/autocert",
-    "pbkdf2",
   ]
   pruneopts = "UT"
   revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
-
-[[projects]]
-  branch = "master"
-  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  pruneopts = "UT"
-  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
 
 [[projects]]
   branch = "master"
@@ -262,22 +147,6 @@
   pruneopts = "UT"
   revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
 
-[[projects]]
-  branch = "v2"
-  digest = "1:5bb148b78468350091db2ffbb2370f35cc6dcd74d9378a31b1c7b86ff7528f08"
-  name = "gopkg.in/tomb.v2"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d5d1b5820637886def9eef33e03a27a9f166942c"
-
-[[projects]]
-  digest = "1:999d566ad1ae4303c456af5a155f7b42401cca4fd33552567ed9dd997b107a08"
-  name = "mellium.im/sasl"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e58e780e1378aa4df5dc705364ff5ae9a4dd1e04"
-  version = "v0.2.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -285,7 +154,7 @@
     "github.com/getsentry/raven-go",
     "github.com/labstack/echo",
     "github.com/lob/logger-go",
-    "github.com/lob/usage-api/pkg/application",
+    "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
   ]
   solver-name = "gps-cdcl"
