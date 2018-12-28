@@ -50,7 +50,9 @@ If an `*http.Request` is available, it may be passed as the second parameter. If
 
 ## Payload Sanitizing
 
-The error handler and Sentry client will sanitize fields in request payloads, replacing them with `[CENSORED]`. To specify the fields to be censored, specify them when creating the Sentry client. 
+The error handler and Sentry client will sanitize fields in request payloads, replacing them with `[CENSORED]`. Cookies often contain session tokens; as such the Cookies are **always** censored. The client can also censor query string fields and sensitive headers.
+
+To specify query string fields to be censored, specify them when creating the Sentry client.
 
 For example, to filter `signature` and `credit_card`, create the client as follows:
 
@@ -65,3 +67,5 @@ client, err := client.NewWithOptions(
     },
 )
 ```
+
+If the client is created via `client.New()`, the `Authorization` header will be censored. An alternative list of headers to censor may be provided as part of the `client.Options`.

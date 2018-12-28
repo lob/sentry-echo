@@ -8,14 +8,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CensoredValueReplacement is the replacement string for filtered values
+var CensoredValueReplacement = "[CENSORED]"
+
+// DefaultFilteredHeaders is the set of headers filtered when creating the client via New()
+var DefaultFilteredHeaders = []string{
+	"Authorization",
+}
+
 type errorReporter interface {
 	Capture(packet *raven.Packet, captureTags map[string]string) (eventID string, ch chan error)
 }
 
 // Options defines the configuration for a Sentry client
 type Options struct {
-	DSN            string
-	FilteredFields []string
+	DSN             string
+	FilteredFields  []string
+	FilteredHeaders []string
 }
 
 // Sentry wraps Sentry's raven.Sentry.
@@ -26,7 +35,7 @@ type Sentry struct {
 
 // New returns an instance of Sentry
 func New(dsn string) (Sentry, error) {
-	return NewWithOptions(Options{DSN: dsn})
+	return NewWithOptions(Options{DSN: dsn, FilteredHeaders: DefaultFilteredHeaders})
 }
 
 // NewWithOptions returns an instance of Sentry with the specified Options
@@ -60,12 +69,25 @@ func (c *Sentry) sanitizeRequest(req *http.Request) *http.Request {
 	url := req.URL
 	query := url.Query()
 
+	// sanitize query string values
 	for _, keyword := range c.options.FilteredFields {
 		for field := range url.Query() {
 			if keyword == field {
-				query[field] = []string{"[CENSORED]"}
+				query[field] = []string{CensoredValueReplacement}
 			}
 		}
+	}
+
+	// sanitized filtered headers
+	for _, keyword := range c.options.FilteredHeaders {
+		if _, ok := req.Header[keyword]; ok {
+			req.Header[keyword] = []string{CensoredValueReplacement}
+		}
+	}
+
+	// remove cookies
+	if _, ok := req.Header["Cookie"]; ok {
+		req.Header["Cookie"] = []string{CensoredValueReplacement}
 	}
 
 	req.URL.RawQuery = query.Encode()

@@ -24,10 +24,19 @@ func (m *mockReporter) Capture(packet *raven.Packet, captureTags map[string]stri
 }
 
 func TestNew(t *testing.T) {
-	sentry, err := New("")
+	t.Run("create client", func(tt *testing.T) {
+		sentry, err := New("")
 
-	assert.NoError(t, err)
-	assert.NotNil(t, sentry)
+		assert.NoError(tt, err)
+		assert.NotNil(tt, sentry)
+	})
+
+	t.Run("default filter headers", func(tt *testing.T) {
+		sentry, err := New("")
+		assert.NoError(tt, err)
+
+		assert.NotEmpty(tt, sentry.options.FilteredHeaders)
+	})
 }
 
 func TestNewWithOptions(t *testing.T) {
@@ -57,17 +66,43 @@ func TestReportSantizesRequest(t *testing.T) {
 	c := &Sentry{
 		client: m,
 		options: Options{
-			FilteredFields: []string{"sekrit"},
+			FilteredFields:  []string{"sekrit"},
+			FilteredHeaders: []string{"Authorization"},
 		},
 	}
 
-	req := httptest.NewRequest("GET", "/path?sekrit=ssssshhhhhh", strings.NewReader(`data`))
-	c.Report(errors.New("aieeeeee"), req)
+	t.Run("sanitizes query string parameters", func(tt *testing.T) {
+		req := httptest.NewRequest("GET", "/path?sekrit=ssssshhhhhh", strings.NewReader(`data`))
+		c.Report(errors.New("aieeeeee"), req)
 
-	reported, ok := m.packet.Interfaces[1].(*raven.Http)
-	assert.True(t, ok)
-	q, _ := url.ParseQuery(reported.Query)
-	assert.NotEqual(t, "ssssshhhhhh", q.Get("sekrit"))
+		reported, ok := m.packet.Interfaces[1].(*raven.Http)
+		assert.True(tt, ok)
+		q, _ := url.ParseQuery(reported.Query)
+		assert.NotEqual(tt, "ssssshhhhhh", q.Get("sekrit"))
+	})
+
+	t.Run("sanitizes headers", func(tt *testing.T) {
+		req := httptest.NewRequest("GET", "/path?sekrit=ssssshhhhhh", nil)
+		req.Header.Set("Authorization", "sekrit")
+
+		c.Report(errors.New("aieeeeee"), req)
+
+		reported, ok := m.packet.Interfaces[1].(*raven.Http)
+		assert.True(t, ok)
+		assert.Equal(tt, CensoredValueReplacement, reported.Headers["Authorization"])
+	})
+
+	t.Run("censors cookies", func(tt *testing.T) {
+		req := httptest.NewRequest("GET", "/path?sekrit=ssssshhhhhh", nil)
+		req.AddCookie(&http.Cookie{Name: "session", Value: "token"})
+
+		c.Report(errors.New("aieeeeee"), req)
+
+		reported, ok := m.packet.Interfaces[1].(*raven.Http)
+		assert.True(t, ok)
+		assert.Equal(tt, CensoredValueReplacement, reported.Cookies)
+		assert.Equal(tt, CensoredValueReplacement, reported.Headers["Cookie"])
+	})
 }
 
 func TestSantizeRequest(t *testing.T) {
