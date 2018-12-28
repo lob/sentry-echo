@@ -1,4 +1,4 @@
-package sentry
+package sentryecho
 
 import (
 	"github.com/labstack/echo"

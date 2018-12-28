@@ -1,4 +1,4 @@
-package client
+package sentry
 
 import (
 	"errors"
@@ -49,16 +49,30 @@ func TestNewWithOptions(t *testing.T) {
 }
 
 func TestReport(t *testing.T) {
-	m := &mockReporter{}
-	c := &Sentry{client: m}
+	t.Run("report without request", func(tt *testing.T) {
+		m := &mockReporter{}
+		c := &Sentry{client: m}
 
-	errString := "some error"
+		errString := "some error"
 
-	req := httptest.NewRequest("GET", "/path", strings.NewReader(`data`))
-	c.Report(errors.New(errString), req)
+		c.Report(errors.New(errString), nil)
 
-	assert.Equal(t, 1, m.numCallsToCapture)
-	assert.Equal(t, errString, m.packet.Message)
+		assert.Equal(t, 1, m.numCallsToCapture)
+		assert.Equal(t, errString, m.packet.Message)
+	})
+
+	t.Run("report with request", func(tt *testing.T) {
+		m := &mockReporter{}
+		c := &Sentry{client: m}
+
+		errString := "some error"
+
+		req := httptest.NewRequest("GET", "/path", strings.NewReader(`data`))
+		c.Report(errors.New(errString), req)
+
+		assert.Equal(t, 1, m.numCallsToCapture)
+		assert.Equal(t, errString, m.packet.Message)
+	})
 }
 
 func TestReportSantizesRequest(t *testing.T) {
