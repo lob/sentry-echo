@@ -5,16 +5,19 @@ import (
 
 	"github.com/labstack/echo"
 	logger "github.com/lob/logger-go"
-
-	"github.com/lob/sentry-echo/pkg/client"
 )
 
+// HTTPErrorReporter defines an interface for reporting errors associated with a Request
+type HTTPErrorReporter interface {
+	Report(error, *http.Request)
+}
+
 type handler struct {
-	reporter client.Sentry
+	reporter HTTPErrorReporter
 }
 
 // RegisterErrorHandler takes in an Echo router and registers routes onto it.
-func RegisterErrorHandler(e *echo.Echo, reporter client.Sentry) {
+func RegisterErrorHandler(e *echo.Echo, reporter HTTPErrorReporter) {
 	h := handler{reporter}
 
 	e.HTTPErrorHandler = h.handleError

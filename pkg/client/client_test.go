@@ -24,15 +24,24 @@ func (m *mockReporter) Capture(packet *raven.Packet, captureTags map[string]stri
 }
 
 func TestNew(t *testing.T) {
-	sentry, err := New("test", "")
+	sentry, err := New("")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, sentry)
 }
 
+func TestNewWithOptions(t *testing.T) {
+	opts := Options{DSN: "", FilteredFields: []string{"sekrit"}}
+	sentry, err := NewWithOptions(opts)
+
+	assert.NoError(t, err)
+	assert.NotZero(t, sentry)
+	assert.Equal(t, opts, sentry.options)
+}
+
 func TestReport(t *testing.T) {
 	m := &mockReporter{}
-	c := &sentry{client: m}
+	c := &Sentry{client: m}
 
 	errString := "some error"
 
@@ -45,7 +54,12 @@ func TestReport(t *testing.T) {
 
 func TestReportSantizesRequest(t *testing.T) {
 	m := &mockReporter{}
-	c := &sentry{client: m, filterFields: []string{"sekrit"}}
+	c := &Sentry{
+		client: m,
+		options: Options{
+			FilteredFields: []string{"sekrit"},
+		},
+	}
 
 	req := httptest.NewRequest("GET", "/path?sekrit=ssssshhhhhh", strings.NewReader(`data`))
 	c.Report(errors.New("aieeeeee"), req)
@@ -57,7 +71,12 @@ func TestReportSantizesRequest(t *testing.T) {
 }
 
 func TestSantizeRequest(t *testing.T) {
-	h := &sentry{client: &mockReporter{}, filterFields: []string{"signature"}}
+	h := &Sentry{
+		client: &mockReporter{},
+		options: Options{
+			FilteredFields: []string{"signature"},
+		},
+	}
 
 	t.Run("censors secret query fields in request", func(tt *testing.T) {
 		req := &http.Request{

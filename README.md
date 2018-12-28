@@ -17,7 +17,7 @@ import github.com/lob/sentry-echo/pkg/client
 
 ...
 
-sentryClient, err := client.New(dsn, environment)
+sentryClient, err := client.New(dsn)
 ```
 
 If the client is unable to be created, an error will be returned.
@@ -34,11 +34,11 @@ var e echo.Echo
 
 ...
 
-sentryClient, _ := client.New(dsn, environment)
-sentry.RegisterErrorHandler(e, sentryClient, []string{})
+sentryClient, _ := client.New(dsn)
+sentry.RegisterErrorHandler(e, sentryClient)
 ```
 
-### Reporting Errors to Sentry
+## Reporting Errors to Sentry
 
 The Sentry client may also be used to report events to Sentry other than internal server errors.
 
@@ -50,8 +50,18 @@ If an `*http.Request` is available, it may be passed as the second parameter. If
 
 ## Payload Sanitizing
 
-The sentry-echo error handler will sanitize fields in request payloads, replacing them with `[CENSORED]`. To specify the fields to be censored, pass the field name in the final parameter to `RegisterErrorHandler`. For example, to filter `signature` and `credit_card`, register the error handler like so:
+The error handler and Sentry client will sanitize fields in request payloads, replacing them with `[CENSORED]`. To specify the fields to be censored, specify them when creating the Sentry client. 
 
-```go
-sentry.RegisterErrorHandler(e, sentryClient, []string{"signature", "credit_card"})
+For example, to filter `signature` and `credit_card`, create the client as follows:
+
+```go,
+client, err := client.NewWithOptions(
+    client.Options{
+        DSN: dsn,
+        FilteredFields: []string{
+            "signature",
+            "credit_card",
+        },
+    },
+)
 ```
