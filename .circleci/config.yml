@@ -24,7 +24,7 @@ jobs:
           name: Install workspace dependencies
           command: |
             make setup
-            make install
+            dep ensure -vendor-only
       - save_cache:
           key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "Gopkg.lock" }}
           paths:
