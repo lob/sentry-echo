@@ -56,8 +56,9 @@ func NewWithOptions(options Options) (Sentry, error) {
 	}, nil
 }
 
-// Report sends information to Sentry.
-func (c *Sentry) Report(err error, req *http.Request) {
+// Report asynchronously sends information to Sentry. If your program ends before the http call is made
+// then the error is lost.
+func (c *Sentry) Report(err error, req *http.Request) (string, chan error) {
 	captured := []raven.Interface{
 		raven.NewException(err, raven.GetOrNewStacktrace(err, 0, 2, nil)),
 	}
@@ -67,7 +68,14 @@ func (c *Sentry) Report(err error, req *http.Request) {
 
 	packet := raven.NewPacket(err.Error(), captured...)
 
-	c.client.Capture(packet, nil)
+	return c.client.Capture(packet, nil)
+}
+
+// ReportSync synchronously sends information to Sentry.
+func (c *Sentry) ReportSync(err error, req *http.Request) (string, error) {
+	errorID, channel := c.Report(err, req)
+	err = <-channel
+	return errorID, err
 }
 
 func (c *Sentry) sanitizeRequest(req *http.Request) *http.Request {
