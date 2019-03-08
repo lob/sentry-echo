@@ -17,10 +17,12 @@ type mockReporter struct {
 	packet            *raven.Packet
 }
 
-func (m *mockReporter) Capture(packet *raven.Packet, captureTags map[string]string) (eventID string, ch chan error) {
+func (m *mockReporter) Capture(packet *raven.Packet, captureTags map[string]string) (string, chan error) {
 	m.numCallsToCapture++
 	m.packet = packet
-	return "", nil
+	ch := make(chan error, 1)
+	ch <- nil
+	return "", ch
 }
 
 func TestNew(t *testing.T) {
@@ -69,6 +71,35 @@ func TestReport(t *testing.T) {
 
 		req := httptest.NewRequest("GET", "/path", strings.NewReader(`data`))
 		c.Report(errors.New(errString), req)
+
+		assert.Equal(t, 1, m.numCallsToCapture)
+		assert.Equal(t, errString, m.packet.Message)
+	})
+}
+
+func TestReportSync(t *testing.T) {
+	t.Run("report without request", func(tt *testing.T) {
+		m := &mockReporter{}
+		c := &Sentry{client: m}
+
+		errString := "some error"
+
+		_, err := c.ReportSync(errors.New(errString), nil)
+		assert.Nil(tt, err)
+
+		assert.Equal(t, 1, m.numCallsToCapture)
+		assert.Equal(t, errString, m.packet.Message)
+	})
+
+	t.Run("report with request", func(tt *testing.T) {
+		m := &mockReporter{}
+		c := &Sentry{client: m}
+
+		errString := "some error"
+
+		req := httptest.NewRequest("GET", "/path", strings.NewReader(`data`))
+		_, err := c.ReportSync(errors.New(errString), req)
+		assert.Nil(tt, err)
 
 		assert.Equal(t, 1, m.numCallsToCapture)
 		assert.Equal(t, errString, m.packet.Message)
