@@ -60,7 +60,7 @@ func NewWithOptions(options Options) (Sentry, error) {
 // then the error is lost.
 func (c *Sentry) Report(err error, req *http.Request) (string, chan error) {
 	captured := []raven.Interface{
-		raven.NewException(err, raven.GetOrNewStacktrace(err, 0, 2, nil)),
+		raven.NewException(errors.Cause(err), raven.GetOrNewStacktrace(err, 0, 2, nil)),
 	}
 	if req != nil {
 		captured = append(captured, raven.NewHttp(c.sanitizeRequest(req)))
