@@ -9,14 +9,14 @@ import (
 
 // HTTPErrorReporter defines an interface for reporting errors associated with a Request
 type HTTPErrorReporter interface {
-	Report(error, *http.Request)
+	Report(error, *http.Request) (string, chan error)
 }
 
 type handler struct {
 	reporter HTTPErrorReporter
 }
 
-// RegisterErrorHandler takes in an Echo router and registers routes onto it.
+// RegisterErrorHandler registers an error reporter as the HTTP Error Handler for Echo
 func RegisterErrorHandler(e *echo.Echo, reporter HTTPErrorReporter) {
 	h := handler{reporter}
 
