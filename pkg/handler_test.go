@@ -5,14 +5,18 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/lob/sentry-echo/pkg/sentry"
+
 	"github.com/labstack/echo"
 	"github.com/lob/sentry-echo/internal/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockSentryClient struct{}
 
-func (m mockSentryClient) Report(err error, req *http.Request) {
+func (m mockSentryClient) Report(err error, req *http.Request) (string, chan error) {
+	return "", nil
 }
 
 func TestHandler(t *testing.T) {
@@ -67,4 +71,12 @@ func TestHandler(t *testing.T) {
 		assert.Equal(tt, http.StatusNotFound, rr.Code, "expected HTTP errors to be correct")
 		assert.Contains(tt, rr.Body.String(), "Not Found", "expected HTTP errors to have the correct message")
 	})
+}
+
+func TestHandlerIntegration(t *testing.T) {
+	s, err := sentry.New("")
+	require.NoError(t, err)
+
+	e := echo.New()
+	RegisterErrorHandler(e, &s)
 }
