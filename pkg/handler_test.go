@@ -20,9 +20,8 @@ func (m mockSentryClient) Report(err error, req *http.Request) (string, chan err
 }
 
 func TestHandler(t *testing.T) {
-	h := handler{reporter: mockSentryClient{}}
-
 	t.Run("surfaces generic errors as internal server errors", func(tt *testing.T) {
+		h := handler{reporter: mockSentryClient{}}
 		c, rr := test.NewContext(t, nil)
 		err := errors.New("foo")
 
@@ -33,6 +32,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	t.Run("surfaces HTTP errors transparently", func(tt *testing.T) {
+		h := handler{reporter: mockSentryClient{}}
 		c, rr := test.NewContext(t, nil)
 		err := echo.NewHTTPError(http.StatusForbidden)
 
@@ -42,7 +42,19 @@ func TestHandler(t *testing.T) {
 		assert.Contains(tt, rr.Body.String(), "Forbidden", "expected HTTP errors to have the correct message")
 	})
 
-	t.Run("overwrites default HTTP status codes if custom error message is provided", func(tt *testing.T) {
+	t.Run("obfuscates custom HTTP error messages", func(tt *testing.T) {
+		h := handler{reporter: mockSentryClient{}}
+		c, rr := test.NewContext(t, nil)
+		err := echo.NewHTTPError(http.StatusForbidden, "this should not be shown")
+
+		h.handleError(err, c)
+
+		assert.Equal(tt, http.StatusForbidden, rr.Code, "expected HTTP errors to be correct")
+		assert.Contains(tt, rr.Body.String(), "Forbidden", "expected HTTP errors to have the correct message")
+	})
+
+	t.Run("overwrites default HTTP status codes message when customErrorMessages is enabled", func(tt *testing.T) {
+		h := handler{reporter: mockSentryClient{}, customErrorMessages: true}
 		c, rr := test.NewContext(t, nil)
 		err := echo.NewHTTPError(http.StatusBadRequest, "custom error message")
 
