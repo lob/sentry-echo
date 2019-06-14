@@ -1,6 +1,7 @@
 package sentryecho
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -33,7 +34,7 @@ func (h *handler) handleError(err error, c echo.Context) {
 
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
-		msg = http.StatusText(code)
+		msg = fmt.Sprintf("%v", he.Message)
 	}
 
 	if code == http.StatusInternalServerError {

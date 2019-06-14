@@ -32,9 +32,9 @@ func TestHandler(t *testing.T) {
 		assert.Contains(tt, rr.Body.String(), "Internal Server Error", "expected generic errors to have the correct message")
 	})
 
-	t.Run("surfaces HTTP errors transparently but obfuscates message", func(tt *testing.T) {
+	t.Run("surfaces HTTP errors transparently", func(tt *testing.T) {
 		c, rr := test.NewContext(t, nil)
-		err := echo.NewHTTPError(http.StatusForbidden, "foo")
+		err := echo.NewHTTPError(http.StatusForbidden)
 
 		h.handleError(err, c)
 
@@ -42,34 +42,14 @@ func TestHandler(t *testing.T) {
 		assert.Contains(tt, rr.Body.String(), "Forbidden", "expected HTTP errors to have the correct message")
 	})
 
-	t.Run("overwrites HTTP 400 error messages", func(tt *testing.T) {
+	t.Run("overwrites default HTTP status codes if custom error message is provided", func(tt *testing.T) {
 		c, rr := test.NewContext(t, nil)
-		err := echo.NewHTTPError(http.StatusBadRequest, "this shouldn't be sent to customers")
+		err := echo.NewHTTPError(http.StatusBadRequest, "custom error message")
 
 		h.handleError(err, c)
 
 		assert.Equal(tt, http.StatusBadRequest, rr.Code, "expected HTTP errors to be correct")
-		assert.Contains(tt, rr.Body.String(), "Bad Request", "expected HTTP errors to have the correct message")
-	})
-
-	t.Run("overwrites HTTP 403 error messages", func(tt *testing.T) {
-		c, rr := test.NewContext(t, nil)
-		err := echo.NewHTTPError(http.StatusForbidden, "this shouldn't be sent to customers")
-
-		h.handleError(err, c)
-
-		assert.Equal(tt, http.StatusForbidden, rr.Code, "expected HTTP errors to be correct")
-		assert.Contains(tt, rr.Body.String(), "Forbidden", "expected HTTP errors to have the correct message")
-	})
-
-	t.Run("overwrites HTTP 404 error messages", func(tt *testing.T) {
-		c, rr := test.NewContext(t, nil)
-		err := echo.NewHTTPError(http.StatusNotFound, "this shouldn't be sent to customers")
-
-		h.handleError(err, c)
-
-		assert.Equal(tt, http.StatusNotFound, rr.Code, "expected HTTP errors to be correct")
-		assert.Contains(tt, rr.Body.String(), "Not Found", "expected HTTP errors to have the correct message")
+		assert.Contains(tt, rr.Body.String(), "custom error message", "expected HTTP errors to have the overwritten message")
 	})
 }
 
