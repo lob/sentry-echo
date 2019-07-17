@@ -1,6 +1,7 @@
 package sentryecho
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -55,6 +56,11 @@ func (h *handler) handleError(err error, c echo.Context) {
 		} else {
 			msg = http.StatusText(code)
 		}
+
+		if he.Internal != nil {
+			// unwrap the error, if possible, so we report/return the actual issue
+			err = he.Internal
+		}
 	}
 
 	if code == http.StatusInternalServerError {
@@ -68,9 +74,15 @@ func (h *handler) handleError(err error, c echo.Context) {
 	}
 	log.Error("request error")
 
-	// format the error as JSON for the middleware response
-	err = c.JSON(code, map[string]interface{}{"error": map[string]interface{}{"message": msg, "status_code": code}})
-	if err != nil {
-		log.Err(err).Error("error handler json error")
+	if !c.Response().Committed {
+		// format the error as JSON for the middleware response
+		if e, ok := err.(json.Marshaler); ok {
+			err = c.JSON(code, e)
+		} else {
+			err = c.JSON(code, map[string]interface{}{"error": map[string]interface{}{"message": msg, "status_code": code}})
+		}
+		if err != nil {
+			log.Err(err).Error("error handler json error")
+		}
 	}
 }
