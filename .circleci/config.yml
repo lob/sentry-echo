@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.10.7
+      - image: circleci/golang:1.15.0
     working_directory: /go/src/github.com/lob/sentry-echo
     steps:
       - restore_cache:
@@ -16,14 +16,12 @@ jobs:
           paths:
             - /go/src/github.com/lob/sentry-echo/.git
       - restore_cache:
-          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "Gopkg.lock" }}
+          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "go.sum" }}
       - run:
           name: Install workspace dependencies
-          command: |
-            make setup
-            dep ensure -vendor-only
+          command: make setup
       - save_cache:
-          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "Gopkg.lock" }}
+          key: vendor-v1-{{ checksum ".go-version" }}-{{ checksum "go.sum" }}
           paths:
             - /go/src/github.com/lob/sentry-echo/vendor
       - run:

@@ -1,6 +1,4 @@
 GOTOOLS := \
-	github.com/alecthomas/gometalinter \
-	github.com/golang/dep/cmd/dep \
 	golang.org/x/tools/cmd/cover \
 
 DIRS     ?= $(shell find . -name '*.go' | grep --invert-match 'vendor' | xargs -n 1 dirname | sort --unique)
@@ -33,18 +31,18 @@ html: ## Generates an HTML coverage report
 .PHONY: lint
 lint: ## Runs all linters
 	@echo "---> Linting"
-	gometalinter --vendor --tests --deadline=2m $(LFLAGS) $(DIRS)
+	$(GOPATH)/bin/golangci-lint run
 
 .PHONY: setup
 setup: ## Installs all development dependencies
 	@echo "--> Installing linter"
 	go get -u -v $(GOTOOLS)
-	gometalinter --install
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.40.1
 
 .PHONY: install
 install: ## Installs dependencies
 	@echo "---> Installing dependencies"
-	dep ensure
+	go mod download
 
 .PHONY: test
 test: ## Runs all the tests and outputs the coverage report
