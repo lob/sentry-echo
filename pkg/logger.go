@@ -11,5 +11,5 @@ func getLogger(c echo.Context) logger.Logger {
 	if log, ok := c.Get(loggerContextKey).(logger.Logger); ok {
 		return log
 	}
-	return logger.New()
+	return logger.New("")
 }

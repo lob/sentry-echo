@@ -18,7 +18,7 @@ func TestGetLogger(t *testing.T) {
 	})
 
 	t.Run("returns logger from Context", func(tt *testing.T) {
-		log := logger.New()
+		log := logger.New("")
 		c, _ := test.NewContext(t, nil)
 		c.Set(loggerContextKey, log)
 
