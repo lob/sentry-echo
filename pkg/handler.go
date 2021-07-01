@@ -61,12 +61,19 @@ func (h *handler) handleError(err error, c echo.Context) {
 		h.reporter.Report(err, c.Request())
 	}
 
-	log = log.Root(logger.Data{"status_code": code})
+	url := c.Request().URL
+	log = log.Root(logger.Data{
+		"status_code": code,
+		"method":      c.Request().Method,
+		"path":        url.Scheme + "://" + url.Host + url.Path,
+	})
 	if code >= 500 {
 		// we only call .Err() if we want to include the stack trace in the log
 		log = log.Err(err)
+		log.Error("server error")
+	} else {
+		log.Warn("request error")
 	}
-	log.Error("request error")
 
 	// format the error as JSON for the middleware response
 	err = c.JSON(code, map[string]interface{}{"error": map[string]interface{}{"message": msg, "status_code": code}})
