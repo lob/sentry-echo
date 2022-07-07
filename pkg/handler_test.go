@@ -7,7 +7,7 @@ import (
 
 	"github.com/lob/sentry-echo/pkg/sentry"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/lob/sentry-echo/internal/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
