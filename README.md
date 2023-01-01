@@ -69,3 +69,4 @@ client, err := client.NewWithOptions(
 ```
 
 If the client is created via `client.New()`, the `Authorization` header will be censored. An alternative list of headers to censor may be provided as part of the `client.Options`.
+test
