@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Test, Lint, and Build
-    runs-on: [self-hosted, lob-runner, x64, linux]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
