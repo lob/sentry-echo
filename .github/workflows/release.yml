@@ -1,0 +1,92 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "What kind of release is this?"
+        type: choice
+        required: true
+        default: "patch"
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create new tag and release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const semVerRegex = '[0-9]+\.[0-9]+\.[0-9]+';
+            const versionPrefix = 'v';
+            const scope = '${{ inputs.release_type }}'.toLowerCase();
+
+            // listTags returns the highest semvers first
+            const opts = await github.rest.repos.listTags.endpoint.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const res = await github.paginate(opts);
+
+            const pattern = `^${versionPrefix}${semVerRegex}$`;
+            const regex = new RegExp(pattern);
+            let semVer;
+            for (const tag of res) {
+              if (regex.test(tag.name)) {
+                semVer = tag.name;
+                break;
+              }
+            }
+            if (!semVer) {
+              semVer = '0.0.0';
+            }
+
+            console.log(`bumping ${semVer}`);
+            semVer = semVer.replace(new RegExp(`^${versionPrefix}`), '').split('.');
+
+            switch (scope) {
+              case 'major':
+                semVer[0] = parseInt(semVer[0]) + 1;
+                semVer[1] = 0;
+                semVer[2] = 0;
+                break;
+              case 'minor':
+                semVer[1] = parseInt(semVer[1]) + 1;
+                semVer[2] = 0;
+                break;
+              default:
+                semVer[2] = parseInt(semVer[2]) + 1;
+            }
+
+            const finalVer = versionPrefix + semVer.join('.');
+            console.log(`creating tag ${finalVer}`);
+
+            const tagRes = await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${finalVer}`,
+              sha: context.sha
+            });
+            console.log(`tag creation result: ${tagRes.status}`);
+
+            console.log(`creating release ${finalVer}`);
+            const relRes = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: finalVer,
+              name: finalVer,
+              generate_release_notes: true
+            });
+            console.log(`release creation result: ${relRes.status}`);
