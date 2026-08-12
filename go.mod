@@ -1,6 +1,6 @@
 module github.com/lob/sentry-echo
 
-go 1.21
+go 1.25.0
 
 require (
 	github.com/getsentry/raven-go v0.2.0
@@ -22,9 +22,9 @@ require (
 	github.com/rs/zerolog v1.23.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
-	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
