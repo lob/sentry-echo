@@ -19,7 +19,7 @@ permissions:
 jobs:
   create-release:
     name: Create Release
-    runs-on: [self-hosted, lob-runner, x64, Linux]
+    runs-on: [self-hosted, lob-runner, x64, linux]
 
     steps:
       - name: Checkout repository
