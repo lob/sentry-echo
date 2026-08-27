@@ -21,8 +21,9 @@ jsconfig.json
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Vendored dependencies
-vendor/*
+# vendor/ is committed on purpose. This repo is public, so it cannot reach any
+# organization secret, and it depends on the private github.com/lob/logger-go.
+# Vendoring is what lets CI build without credentials. See PLAT-3444.
 _vendor*/*
 
 # Binary executables
