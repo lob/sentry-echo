@@ -20,8 +20,12 @@ jobs:
       - name: Test
         run: make test
 
+      # golangci-lint v1.64.8 is built with go1.24 and refuses a go 1.25 target,
+      # so the v6 action cannot lint this module. v2 is the first line built with go1.25+.
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13
 
       - name: Build
         run: go build ./...
