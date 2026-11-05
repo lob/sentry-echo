@@ -46,14 +46,15 @@ func (h *handler) handleError(c *echo.Context, err error) {
 	log := getLogger(c)
 
 	// echo v5's own errors (ErrNotFound etc.) aren't *echo.HTTPError, so read the status through HTTPStatusCoder.
-	code := echo.StatusCode(err)
-	if code == 0 {
-		code = http.StatusInternalServerError
+	code := http.StatusInternalServerError
+	var statusCoder echo.HTTPStatusCoder
+	if errors.As(err, &statusCoder) && statusCoder.StatusCode() != 0 {
+		code = statusCoder.StatusCode()
 	}
 	msg := http.StatusText(code)
 
-	var he *echo.HTTPError
-	if h.customErrorMessages && errors.As(err, &he) && he.Message != "" {
+	// Take the message only from the error that set the status, so a 500 never shows an inner error's message.
+	if he, ok := statusCoder.(*echo.HTTPError); ok && h.customErrorMessages && he.Code == code && he.Message != "" {
 		msg = he.Message
 	}
 

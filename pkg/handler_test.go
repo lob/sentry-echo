@@ -108,6 +108,18 @@ func TestHandler(t *testing.T) {
 		assert.Equal(tt, http.StatusBadRequest, rr.Code, "expected HTTP errors to be correct")
 		assert.Contains(tt, rr.Body.String(), "custom error message", "expected HTTP errors to have the overwritten message")
 	})
+
+	t.Run("does not show a message from an error other than the one that set the status", func(tt *testing.T) {
+		h := handler{reporter: mockSentryClient{}, customErrorMessages: true}
+		c, rr := test.NewContext(tt, nil)
+		err := errors.Join(echo.ErrInternalServerError, echo.NewHTTPError(http.StatusForbidden, "inner detail"))
+
+		h.handleError(c, err)
+
+		assert.Equal(tt, http.StatusInternalServerError, rr.Code)
+		assert.Contains(tt, rr.Body.String(), "Internal Server Error")
+		assert.NotContains(tt, rr.Body.String(), "inner detail")
+	})
 }
 
 func TestHandlerIntegration(t *testing.T) {
