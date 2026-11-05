@@ -1,11 +1,11 @@
 package sentryecho
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-	logger "github.com/lob/logger-go"
+	"github.com/labstack/echo/v5"
+	logger "github.com/lob/logger-go/v2"
 )
 
 // Options defines a struct that allows you to modify the behavior of how errors are reported.
@@ -42,19 +42,19 @@ func RegisterErrorHandler(e *echo.Echo, reporter HTTPErrorReporter) {
 
 // handleError is an Echo error handler that uses HTTP errors accordingly, and any
 // generic error will be interpreted as an internal server error.
-func (h *handler) handleError(err error, c echo.Context) {
+func (h *handler) handleError(c *echo.Context, err error) {
 	log := getLogger(c)
 
-	code := http.StatusInternalServerError
+	// echo v5's own errors (ErrNotFound etc.) aren't *echo.HTTPError, so read the status through HTTPStatusCoder.
+	code := echo.StatusCode(err)
+	if code == 0 {
+		code = http.StatusInternalServerError
+	}
 	msg := http.StatusText(code)
 
-	if he, ok := err.(*echo.HTTPError); ok {
-		code = he.Code
-		if h.customErrorMessages {
-			msg = fmt.Sprintf("%v", he.Message)
-		} else {
-			msg = http.StatusText(code)
-		}
+	var he *echo.HTTPError
+	if h.customErrorMessages && errors.As(err, &he) && he.Message != "" {
+		msg = he.Message
 	}
 
 	if code == http.StatusInternalServerError {

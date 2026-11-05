@@ -2,19 +2,20 @@ package test
 
 import (
 	"bytes"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-// NewContext returns a new echo.Context, and *httptest.ResponseRecorder to be
+// NewContext returns a new *echo.Context, and *httptest.ResponseRecorder to be
 // used for tests.
-func NewContext(t *testing.T, payload []byte) (echo.Context, *httptest.ResponseRecorder) {
+func NewContext(t *testing.T, payload []byte) (*echo.Context, *httptest.ResponseRecorder) {
 	t.Helper()
 
 	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/", bytes.NewReader(payload))
+	req := httptest.NewRequest(http.MethodGet, "/", bytes.NewReader(payload))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rr := httptest.NewRecorder()
 	c := e.NewContext(req, rr)

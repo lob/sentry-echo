@@ -3,8 +3,8 @@ package sentryecho
 import (
 	"testing"
 
-	logger "github.com/lob/logger-go"
-	"github.com/lob/sentry-echo/internal/test"
+	logger "github.com/lob/logger-go/v2"
+	"github.com/lob/sentry-echo/v2/internal/test"
 	"github.com/stretchr/testify/assert"
 )
 
