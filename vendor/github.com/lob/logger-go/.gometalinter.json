@@ -1,9 +1,0 @@
-{
-  "Enable": [
-    "golint",
-    "deadcode",
-    "varcheck",
-    "unconvert",
-    "staticcheck"
-  ]
-}
